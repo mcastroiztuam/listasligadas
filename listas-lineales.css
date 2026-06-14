@@ -137,6 +137,7 @@
       border-radius: 10px; padding: 1.25rem;
       font-family: var(--font-mono); font-size: 0.82rem;
       line-height: 1.8; overflow-x: auto;
+      white-space: pre;
     }
     .code-block .kw { color: #c792ea; }
     .code-block .type { color: #82aaff; }
