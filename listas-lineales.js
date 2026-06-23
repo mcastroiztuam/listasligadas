@@ -1,6 +1,76 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   // ==========================================
+  // 0. INTEGRACIÓN CON SUPABASE (V2)
+  // ==========================================
+  const SUPABASE_URL = 'https://cltqcdulmprwmxurjdrx.supabase.co'; 
+  const SUPABASE_ANON_KEY = 'sb_publishable_CNJNIcAjrufwDFAX4stx_Q_MKcFYvzj';
+
+  // Inicializar el cliente de Supabase
+  const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Elementos del DOM para Autenticación
+  const authContainer = document.getElementById('auth-container');
+  const appContainer = document.getElementById('app-container');
+  const authForm = document.getElementById('auth-form');
+  const emailInput = document.getElementById('auth-email');
+  const passwordInput = document.getElementById('auth-password');
+  const btnRegister = document.getElementById('btn-register');
+  const btnLogout = document.getElementById('btn-logout');
+
+  // Escuchar cambios en el estado de autenticación de Supabase
+  _supabase.auth.onAuthStateChange((event, session) => {
+    if (session) {
+      // Usuario autenticado: Mostrar app, ocultar login
+      authContainer.style.display = 'none';
+      appContainer.style.display = 'block';
+    } else {
+      // Usuario no autenticado: Mostrar login, ocultar app
+      authContainer.style.display = 'flex';
+      appContainer.style.display = 'none';
+    }
+  });
+
+  // Manejo del formulario de Login (Submit)
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = emailInput.value;
+    const password = passwordInput.value;
+
+    const { error } = await _supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      alert(`Error al iniciar sesión: ${error.message}`);
+    } else {
+      authForm.reset();
+    }
+  });
+
+  // Manejo del botón de Registro
+  btnRegister.addEventListener('click', async () => {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+      alert('Por favor ingresa un correo y contraseña válidos para registrarte.');
+      return;
+    }
+
+    const { error } = await _supabase.auth.signUp({ email, password });
+    if (error) {
+      alert(`Error en el registro: ${error.message}`);
+    } else {
+      alert('¡Usuario registrado con éxito! Si configuraste confirmación por correo, no olvides revisarlo.');
+    }
+  });
+
+  // Manejo del botón de Cerrar Sesión
+  btnLogout.addEventListener('click', async () => {
+    const { error } = await _supabase.auth.signOut();
+    if (error) alert(`Error al cerrar sesión: ${error.message}`);
+  });
+
+
+  // ==========================================
   // 1. SLIDES ENGINE
   // ==========================================
   const slides = document.querySelectorAll('.slide-content');
@@ -40,7 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================
   // 2. SIMULADOR — ESTADO
   // ==========================================
-  // Lista enlazada en JS: array de { dato, id }
   let lista = []; // cada elemento: { dato: number, id: string }
   let nodeIdCounter = 0;
 
@@ -108,25 +177,21 @@ document.addEventListener('DOMContentLoaded', () => {
     nodeCountEl.textContent = lista.length;
 
     lista.forEach((node, i) => {
-      // Wrapper del nodo con etiqueta HEAD si es primero
       const wrapper = document.createElement('div');
       wrapper.className = 'vis-node';
       wrapper.id = `vnode-${node.id}`;
 
-      // Etiqueta HEAD para el primero
       if (i === 0) {
         const headPtr = document.createElement('div');
         headPtr.className = 'head-pointer';
         headPtr.innerHTML = `<span>HEAD</span><span class="down-arrow">↓</span>`;
         wrapper.appendChild(headPtr);
       } else {
-        // espacio vacío para alinear
         const spacer = document.createElement('div');
         spacer.style.height = '34px';
         wrapper.appendChild(spacer);
       }
 
-      // Caja del nodo
       const box = document.createElement('div');
       box.className = 'vis-node-box';
 
@@ -142,7 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
       box.appendChild(sigEl);
       wrapper.appendChild(box);
 
-      // Etiqueta índice
       const lbl = document.createElement('div');
       lbl.className = 'vis-node-label';
       lbl.textContent = `nodo[${i}]`;
@@ -150,7 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       nodesRow.appendChild(wrapper);
 
-      // Flecha entre nodos
       if (i < lista.length - 1) {
         const arrow = document.createElement('div');
         arrow.className = 'vis-arrow';
@@ -159,7 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Terminador null
     const nullArrow = document.createElement('div');
     nullArrow.className = 'vis-arrow';
     nullArrow.textContent = '→';
@@ -219,7 +281,6 @@ document.addEventListener('DOMContentLoaded', () => {
     highlight('cl-eli-ini-check', 'cl-eli-ini-move');
     const removed = lista[0];
 
-    // animación de salida
     const el = document.getElementById(`vnode-${removed.id}`);
     if (el) el.classList.add('removing');
     setTimeout(() => {
@@ -257,7 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
     log('Lista reiniciada. cabeza → null.', 'muted-log');
   });
 
-  // Enter en input para insertar al inicio rápido
   simInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') document.getElementById('btnInsertarInicio').click();
   });
