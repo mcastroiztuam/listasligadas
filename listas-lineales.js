@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (session) {
       // Usuario autenticado: Mostrar app, ocultar login
       authContainer.style.display = 'none';
-      appContainer.style.display = 'block';
+      appContainer.style.display = '';
     } else {
       // Usuario no autenticado: Mostrar login, ocultar app
       authContainer.style.display = 'flex';
