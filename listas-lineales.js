@@ -45,23 +45,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Manejo del botón de Registro
-  btnRegister.addEventListener('click', async () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
+ // Manejo del botón de Registro
+btnRegister.addEventListener('click', async () => {
+  const email = emailInput.value;
+  const password = passwordInput.value;
 
-    if (!email || !password) {
-      alert('Por favor ingresa un correo y contraseña válidos para registrarte.');
-      return;
-    }
+  if (!email || !password) {
+    alert('Por favor ingresa un correo y contraseña válidos para registrarte.');
+    return;
+  }
 
-    const { error } = await _supabase.auth.signUp({ email, password });
-    if (error) {
-      alert(`Error en el registro: ${error.message}`);
-    } else {
-      alert('¡Usuario registrado con éxito! Si configuraste confirmación por correo, no olvides revisarlo.');
+  // Agregamos las opciones para forzar la redirección correcta en GitHub Pages
+  const { error } = await _supabase.auth.signUp({ 
+    email, 
+    password,
+    options: {
+      redirectTo: 'https://mcastroiztuam.github.io/listasligadas/index.html'
     }
   });
+
+  if (error) {
+    alert(`Error en el registro: ${error.message}`);
+  } else {
+    alert('¡Usuario registrado con éxito! Por favor, revisa tu correo electrónico para confirmar tu cuenta.');
+  }
+});
 
   // Manejo del botón de Cerrar Sesión
   btnLogout.addEventListener('click', async () => {
